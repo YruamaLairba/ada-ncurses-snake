@@ -16,25 +16,41 @@ procedure serpent is
 
    snake : list;
    snake_cursor : cursor;
-   pos : T_position;
+   pos, pop : T_position;
    temps : Time := Clock; 
    duree : Duration := 1.0;
    key : Real_Key_Code;
+   curs_visibility : Cursor_Visibility := Invisible;
 begin
    Init_Screen;
    Set_Timeout_Mode(mode=>Non_Blocking,Amount=>0);
+   Set_Cursor_Visibility(curs_visibility);
    border(standard_window);
    Move_cursor(standard_window,0,1);
    Put("jeu du serpent");
+   --init the snake with a size
+   pos := (line=>1,Column=>1);
+   for i in 1..8 loop
+      Prepend(snake,pos);
+      Add(Line=>pos.line, Column=>pos.column, ch=>'O');
+   end loop;
+   --star moving the snake
    temps := Clock;
-   pos := (line=>1, Column=>0);
    main: loop
-      if (Clock - temps) >= 0.25 then
+      if (Clock - temps) >= 0.5 then
          temps := Clock;
          pos.column := pos.column + 1;
          exit when pos.column > (Columns - 1);
+         --add element to the front
          Prepend(snake,pos);
          Add(Line=>pos.line, Column=>pos.column, ch=>'O');
+         Refresh;
+         --delete element at the end
+         pop := Last_element(snake);
+         Delete_Last(snake);
+         if (not Contains(snake, pop)) then
+            Add(Line=>pop.line, Column=>pop.column, ch=>' ');
+         end if;
          Refresh;
       end if;
    end loop main;

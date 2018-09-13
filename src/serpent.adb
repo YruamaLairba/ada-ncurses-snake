@@ -1,55 +1,64 @@
-With xterm_console ;            Use xterm_console ;
+with Terminal_Interface.Curses;
+use  Terminal_Interface.Curses;
+with Terminal_Interface.Curses.Text_IO;
+use  Terminal_Interface.Curses.Text_IO;
+
+with Ada.Containers.Doubly_Linked_Lists ;
 with Ada.Calendar; use Ada.Calendar;
-with ada.text_io; use ada.text_io;
-with ada.wide_text_io; use ada.wide_text_io;
-with Ada.Strings.UTF_Encoding; use Ada.Strings.UTF_Encoding;
-with Ada.Strings.UTF_Encoding.Conversions;
-use Ada.Strings.UTF_Encoding.Conversions;
 
 procedure serpent is
-    temps : Time := Clock; 
-    duree : Duration := 1.0;
-    UP : String := ASCII.ESC & '[' & 'A';
-    DOWN : String := ASCII.ESC & '[' & 'B';
-    RIGHT : String := ASCII.ESC & '[' & 'C';
-    LEFT : String := ASCII.ESC & '[' & 'D';
+   type T_Position is record
+      line : Line_Position; 
+      column : Column_Position ; 
+   end record ;
+   package P_Lists is new Ada.Containers.Doubly_Linked_Lists(T_Position) ; 
+   use P_Lists ;
 
-    --VBAR : UTF_8_String := Convert("" & Wide_Character'val(16#2503#));
-    --HBAR : UTF_8_String := Convert("" & Wide_Character'val(16#2501#));
-    --UP_LEFT_BAR : UTF_8_String := Convert("" & Wide_Character'val(16#251B#));
-    --DOWN_LEFT_BAR : UTF_8_String := Convert("" & Wide_Character'val(16#2513#));
-    --UP_RIGHT_BAR : UTF_8_String := Convert("" & Wide_Character'val(16#2503#)) ;
-    --DOWN_RIGHT_BAR : UTF_8_String := Convert("" & Wide_Character'val(16#2517#));
-
-    VBAR : UTF_8_String := Convert("" & Wide_Character'val(16#2551#));
-    HBAR : UTF_8_String := Convert("" & Wide_Character'val(16#2550#));
-    UP_LEFT_BAR : UTF_8_String := Convert("" & Wide_Character'val(16#255D#));
-    DOWN_LEFT_BAR : UTF_8_String := Convert("" & Wide_Character'val(16#2557#));
-    UP_RIGHT_BAR : UTF_8_String := Convert("" & Wide_Character'val(16#255A#)) ;
-    DOWN_RIGHT_BAR : UTF_8_String := Convert("" & Wide_Character'val(16#2554#));
-
+   snake : list;
+   snake_cursor : cursor;
+   pos : T_position;
+   temps : Time := Clock; 
+   duree : Duration := 1.0;
+   key : Real_Key_Code;
 begin
-    ada.text_io.put_line("Jeu du serpent");
-    temps := Clock;
-    Alternate_Screen_Buffer;
-    main: loop
-        declare
-            x : natural;
-            a : Character;
-            b : boolean;
-        begin
-            x := 0;
-            get_immediate(a,b);
-            if x in 0..79 then
-                if (Clock - temps) >= 0.5 then
-                    temps := Clock;
-                    GOTO_XY(x,0);
-                    Put(HBAR);
-                end if;
-            else 
-                exit main;
-            end if;
-        end;
-    end loop main;
-    Normal_Screen_Buffer;
+   Init_Screen;
+   Set_Timeout_Mode(mode=>Non_Blocking,Amount=>0);
+   border(standard_window);
+   Move_cursor(standard_window,0,1);
+   Put("jeu du serpent");
+   temps := Clock;
+   pos := (line=>1, Column=>0);
+   main: loop
+      if (Clock - temps) >= 0.25 then
+         temps := Clock;
+         pos.column := pos.column + 1;
+         exit when pos.column > (Columns - 1);
+         Prepend(snake,pos);
+         Add(Line=>pos.line, Column=>pos.column, ch=>'O');
+         Refresh;
+      end if;
+   end loop main;
+         
+   --main: loop
+   --   declare
+   --      x : natural;
+   --      a : Character;
+   --      b : boolean;
+   --   begin
+   --      x := 0;
+   --      --get_immediate(a,b);
+   --      --if x in 0..79 then
+   --      --   if (Clock - temps) >= 0.5 then
+   --      --      temps := Clock;
+   --      --      GOTO_XY(x,0);
+   --      --      Put(HBAR);
+   --      --   end if;
+   --      --else 
+   --      --   exit main;
+   --      --end if;
+   --   end;
+   --end loop main;
+   Set_Timeout_Mode(mode=>Blocking,Amount=>0);
+   key := Get_Keystroke;
+   End_Windows;
 end serpent;

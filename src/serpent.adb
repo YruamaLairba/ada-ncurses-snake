@@ -58,21 +58,27 @@ begin
    --star moving the snake
    temps := Clock;
    main: loop
-      declare
-         tmp_delta_pos : T_Position:= (0,0);
       begin
          key := Get_Keystroke;
          case key is
-            when KEY_UP => tmp_delta_pos := (-1,0);--Put("key_up");
-            when KEY_DOWN => tmp_delta_pos := (1,0);--Put("key_down");
-            when KEY_LEFT => tmp_delta_pos := (0,-1);--Put("key_left");
-            when KEY_RIGHT => tmp_delta_pos := (0,1);--Put("key_right");
+            when KEY_UP =>
+               if delta_pos /= (1,0) then
+                  delta_pos := (-1,0);
+               end if;
+            when KEY_DOWN =>
+               if delta_pos /= (-1,0) then
+                  delta_pos := (1,0);
+               end if;
+            when KEY_LEFT =>
+               if delta_pos /= (0,1) then
+                  delta_pos := (0,-1);
+               end if;
+            when KEY_RIGHT =>
+               if delta_pos /= (0,-1) then
+                  delta_pos := (0,1);
+               end if;
             when others => null; 
          end case;
-         Move_Cursor(Standard_Window,0,15);
-         if tmp_delta_pos /= (0,0) then
-            delta_pos := tmp_delta_pos;
-         end if;
       end;
       if (Clock - temps) >= 0.5 then
          temps := Clock;

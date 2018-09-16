@@ -28,8 +28,18 @@ procedure serpent is
    is new Terminal_Interface.Curses.Text_IO.Integer_IO(Column_Position);
    use Column_Position_Text_IO;
 
-   --function Self_Collision(snake : list, pos : T_Position) return Boolean is
-   --begin
+   function Self_Collision(snake : list; pos : T_Position) return Boolean is
+   curs : cursor := First(snake);
+   begin
+      while curs /= Last(snake) loop
+         if Element(curs)= pos then
+            return true;
+         else
+            Next(Curs);
+         end if;
+      end loop;
+      return false;
+   end Self_Collision;
 
    snake : list;
    snake_cursor : cursor;
@@ -90,7 +100,7 @@ begin
          exit when pos.line > (Lines - 1);
          exit when pos.line < (1);
          --detect self collision
-         exit when (Contains(snake, pos)and Last_Element(snake) /= pos) ;
+         exit when Self_Collision(snake, pos) ;
          --add element to the front
          Prepend(snake,pos);
          Add(Line=>pos.line, Column=>pos.column, ch=>'O');

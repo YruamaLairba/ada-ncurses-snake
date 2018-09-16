@@ -95,9 +95,9 @@ begin
          temps := Clock;
          pos := pos + delta_pos;
          --detect collision with border
-         exit when pos.column > (Columns - 1);
+         exit when pos.column > (Columns - 2);
          exit when pos.column < (1);
-         exit when pos.line > (Lines - 1);
+         exit when pos.line > (Lines - 2);
          exit when pos.line < (1);
          --detect self collision
          exit when Self_Collision(snake, pos) ;

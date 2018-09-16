@@ -49,13 +49,17 @@ procedure serpent is
 
    procedure Spawn_Point(
       Gen: Generator;
+      snake: List;
       point : out T_Position)
    is
    begin
-      point.line := 1 + Line_Position(Float(Lines-2) * Random(Gen))
-         mod (Lines-2);
-      point.column := 1 + Column_Position(Float(Columns-2) * Random(Gen))
-         mod (Columns-2);
+      loop
+         point.line := 1 + Line_Position(Float(Lines-2) * Random(Gen))
+            mod (Lines-2);
+         point.column := 1 + Column_Position(Float(Columns-2) * Random(Gen))
+            mod (Columns-2);
+         exit when not Contains(snake, point);
+      end loop;
       Add(Line=>point.line, Column=>point.column, ch=>'x');
    end Spawn_Point;
 
@@ -83,7 +87,7 @@ begin
       Prepend(snake,pos);
       Add(Line=>pos.line, Column=>pos.column, ch=>'O');
    end loop;
-   Spawn_Point(Gen, point);
+   Spawn_Point(Gen, snake, point);
    --star moving the snake
    temps := Clock;
    main: loop
@@ -123,7 +127,7 @@ begin
          exit when Self_Collision(snake, pos) ;
          --detect if snake eat the point
          if pos = point then
-            Spawn_Point(Gen, point);
+            Spawn_Point(Gen, snake, point);
             Append(snake, snake.Last_Element);
          end if;
          --add element to the front

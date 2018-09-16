@@ -28,11 +28,10 @@ procedure serpent is
    is new Terminal_Interface.Curses.Text_IO.Integer_IO(Column_Position);
    use Column_Position_Text_IO;
 
-
-   type T_Direction is (Up, Down, Left, Right);
+   --function Self_Collision(snake : list, pos : T_Position) return Boolean is
+   --begin
 
    snake : list;
-   direction : T_Direction := Right;
    snake_cursor : cursor;
    pos, pop : T_position;
    delta_pos : T_position :=(0,1);
@@ -58,6 +57,7 @@ begin
    --star moving the snake
    temps := Clock;
    main: loop
+      --Get the direction
       begin
          key := Get_Keystroke;
          case key is
@@ -80,13 +80,17 @@ begin
             when others => null; 
          end case;
       end;
+      --Moving the snake on tick
       if (Clock - temps) >= 0.5 then
          temps := Clock;
          pos := pos + delta_pos;
+         --detect collision with border
          exit when pos.column > (Columns - 1);
          exit when pos.column < (1);
          exit when pos.line > (Lines - 1);
          exit when pos.line < (1);
+         --detect self collision
+         exit when (Contains(snake, pos)and Last_Element(snake) /= pos) ;
          --add element to the front
          Prepend(snake,pos);
          Add(Line=>pos.line, Column=>pos.column, ch=>'O');

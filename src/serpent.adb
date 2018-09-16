@@ -6,12 +6,15 @@ with Terminal_Interface.Curses.Text_IO.Integer_IO;
 
 with Ada.Containers.Doubly_Linked_Lists ;
 with Ada.Calendar; use Ada.Calendar;
+With Ada.Numerics.Float_Random;
+use Ada.Numerics.Float_Random;
 
 procedure serpent is
    type T_Position is record
-      line : Line_Position; 
-      column : Column_Position ; 
+      line : Line_Position;
+      column : Column_Position ;
    end record;
+
    function "+" (Left, Right : T_Position) return T_Position is
       res : T_Position;
    begin
@@ -19,12 +22,15 @@ procedure serpent is
       res.column := left.column + right.column;
       return res;
    end "+";
-   package P_Lists is new Ada.Containers.Doubly_Linked_Lists(T_Position) ; 
+
+   package P_Lists is new Ada.Containers.Doubly_Linked_Lists(T_Position) ;
    use P_Lists ;
+
    package Line_Position_Text_IO
    is new Terminal_Interface.Curses.Text_IO.Integer_IO(Line_Position);
    use Line_Position_Text_IO;
-   package Column_Position_Text_IO 
+
+   package Column_Position_Text_IO
    is new Terminal_Interface.Curses.Text_IO.Integer_IO(Column_Position);
    use Column_Position_Text_IO;
 
@@ -41,11 +47,24 @@ procedure serpent is
       return false;
    end Self_Collision;
 
+   procedure Spawn_Point(
+      Gen: Generator;
+      point : out T_Position)
+   is
+   begin
+      point.line := 1 + Line_Position(Float(Lines-2) * Random(Gen))
+         mod (Lines-2);
+      point.column := 1 + Column_Position(Float(Columns-2) * Random(Gen))
+         mod (Columns-2);
+      Add(Line=>point.line, Column=>point.column, ch=>'x');
+   end Spawn_Point;
+
    snake : list;
    snake_cursor : cursor;
-   pos, pop : T_position;
+   pos, pop, point : T_position;
    delta_pos : T_position :=(0,1);
-   temps : Time := Clock; 
+   Gen : Generator;
+   temps : Time := Clock;
    duree : Duration := 1.0;
    key : Real_Key_Code;
    curs_visibility : Cursor_Visibility := Invisible;
@@ -64,6 +83,7 @@ begin
       Prepend(snake,pos);
       Add(Line=>pos.line, Column=>pos.column, ch=>'O');
    end loop;
+   Spawn_Point(Gen, point);
    --star moving the snake
    temps := Clock;
    main: loop
@@ -87,7 +107,7 @@ begin
                if delta_pos /= (0,-1) then
                   delta_pos := (0,1);
                end if;
-            when others => null; 
+            when others => null;
          end case;
       end;
       --Moving the snake on tick
@@ -101,6 +121,11 @@ begin
          exit when pos.line < (1);
          --detect self collision
          exit when Self_Collision(snake, pos) ;
+         --detect if snake eat the point
+         if pos = point then
+            Spawn_Point(Gen, point);
+            Append(snake, snake.Last_Element);
+         end if;
          --add element to the front
          Prepend(snake,pos);
          Add(Line=>pos.line, Column=>pos.column, ch=>'O');
@@ -114,7 +139,7 @@ begin
          Refresh;
       end if;
    end loop main;
-         
+
    --main: loop
    --   declare
    --      x : natural;

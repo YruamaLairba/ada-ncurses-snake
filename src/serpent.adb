@@ -23,6 +23,14 @@ procedure serpent is
       return res;
    end "+";
 
+   function "-" (Left, Right : T_Position) return T_Position is
+      res : T_Position;
+   begin
+      res.line := left.line - right.line;
+      res.column := left.column - right.column;
+      return res;
+   end "-";
+
    package P_Lists is new Ada.Containers.Doubly_Linked_Lists(T_Position) ;
    use P_Lists ;
 
@@ -130,16 +138,62 @@ begin
             Spawn_Point(Gen, snake, point);
             Append(snake, snake.Last_Element);
          end if;
-         --add element to the front
-         Prepend(snake,pos);
-         Add(Line=>pos.line, Column=>pos.column, ch=>'O');
-         Refresh;
-         --delete element at the end
-         pop := Last_element(snake);
-         Delete_Last(snake);
-         if (not Contains(snake, pop)) then
-            Add(Line=>pop.line, Column=>pop.column, ch=>' ');
-         end if;
+         --Snake moves and draw
+         declare
+            curs,c_next,c_prev : Cursor;
+            cur,next,prev : T_Position;
+            a,b,c : T_Position;
+         begin
+            --the head of the snake
+            Prepend(snake,pos);
+            curs := First(snake);
+            cur := Element(curs);
+            --Add(Line=>pos.line, Column=>pos.column, ch=>'O');
+            Add(
+               Line=>Element(curs).line,
+               Column=>Element(curs).column,
+               ch=>ACS_MAP(ACS_Diamond));
+            --drawing the body part just after the head
+            curs := P_lists.Next(curs);
+            if Has_Element(curs) then
+               cur := Element(curs);
+               c_next := P_Lists.Next(curs);
+               next := Element(P_Lists.Next(curs));
+               prev := Element(P_Lists.Previous(curs));
+               a := cur - prev;
+               b := cur - next;
+               c := a + b;
+               if c = (-1,-1) then 
+                  Add(
+                     Line=>Element(curs).line,
+                     Column=>Element(curs).column,
+                     ch=>ACS_MAP(ACS_Upper_Left_Corner));
+               elsif c = (1,-1) then
+                  Add(
+                     Line=>Element(curs).line,
+                     Column=>Element(curs).column,
+                     ch=>ACS_MAP(ACS_Lower_Left_Corner));
+               elsif c = (-1,1) then
+                  Add(
+                     Line=>Element(curs).line,
+                     Column=>Element(curs).column,
+                     ch=>ACS_MAP(ACS_Upper_Right_Corner));
+               elsif c = (1,1) then
+                  Add(
+                     Line=>Element(curs).line,
+                     Column=>Element(curs).column,
+                     ch=>ACS_MAP(ACS_Lower_Right_Corner));
+               end if;
+            end if;
+
+            Refresh;
+            --delete element at the end
+            pop := Last_element(snake);
+            Delete_Last(snake);
+            if (not Contains(snake, pop)) then
+               Add(Line=>pop.line, Column=>pop.column, ch=>' ');
+            end if;
+         end;
          Refresh;
       end if;
    end loop main;

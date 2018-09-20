@@ -80,6 +80,8 @@ procedure serpent is
    duree : Duration := 1.0;
    key : Real_Key_Code;
    curs_visibility : Cursor_Visibility := Invisible;
+   speed : Float := 2.0;
+   loop_delay : Duration := Duration(1.0/speed);
 begin
    Init_Screen;
    Set_Timeout_Mode(mode=>Non_Blocking,Amount=>0);
@@ -123,14 +125,10 @@ begin
          end case;
       end;
       --Moving the snake on tick
-      if (Clock - temps) >= 0.5 then
+      if (Clock - temps) >= loop_delay then
          temps := Clock;
          last_dir := dir;
          pos := pos + dir;
-         Move_cursor(standard_window,0,10);
-         Put(pos.line);
-         Put(",");
-         Put(pos.column);
          --detect collision with border
          exit when pos.column > (Columns - 2);
          exit when pos.column < (1);
@@ -142,6 +140,8 @@ begin
          if pos = point then
             Spawn_Point(Gen, snake, point);
             Append(snake, snake.Last_Element);
+            speed := speed + 0.10;
+            loop_delay := Duration(1.0/speed);
          end if;
          --Snake moves and draw
          declare

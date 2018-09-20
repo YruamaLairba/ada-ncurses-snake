@@ -42,6 +42,10 @@ procedure serpent is
    is new Terminal_Interface.Curses.Text_IO.Integer_IO(Column_Position);
    use Column_Position_Text_IO;
 
+   package Integer_Text_IO
+   is new Terminal_Interface.Curses.Text_IO.Integer_IO(Integer);
+   use Integer_Text_IO;
+
    function Self_Collision(snake : list; pos : T_Position) return Boolean is
    curs : cursor := First(snake);
    begin
@@ -82,6 +86,7 @@ procedure serpent is
    curs_visibility : Cursor_Visibility := Invisible;
    speed : Float := 2.0;
    loop_delay : Duration := Duration(1.0/speed);
+   score : Integer := 0;
 begin
    Init_Screen;
    Set_Timeout_Mode(mode=>Non_Blocking,Amount=>0);
@@ -91,6 +96,10 @@ begin
    border(standard_window);
    Move_cursor(standard_window,0,1);
    Put("jeu du serpent");
+   Move_Cursor(standard_window,0,18);
+   Put("score : ");
+   Put(score);
+
    --init the snake with a size
    pos := (line=>1,Column=>1);
    for i in 1..8 loop
@@ -142,6 +151,10 @@ begin
             Append(snake, snake.Last_Element);
             speed := speed + 0.10;
             loop_delay := Duration(1.0/speed);
+            score := score + 1;
+            Move_Cursor(standard_window,0,18);
+            Put("score : ");
+            Put(score);
          end if;
          --Snake moves and draw
          declare
@@ -153,7 +166,6 @@ begin
             Prepend(snake,pos);
             curs := First(snake);
             cur := Element(curs);
-            --Add(Line=>pos.line, Column=>pos.column, ch=>'O');
             Add(
                Line=>Element(curs).line,
                Column=>Element(curs).column,

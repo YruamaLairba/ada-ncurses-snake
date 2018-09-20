@@ -74,7 +74,7 @@ procedure serpent is
    snake : list;
    snake_cursor : cursor;
    pos, pop, point : T_position;
-   delta_pos : T_position :=(0,1);
+   dir, last_dir : T_position :=(0,1); --snake direction
    Gen : Generator;
    temps : Time := Clock;
    duree : Duration := 1.0;
@@ -104,20 +104,20 @@ begin
          key := Get_Keystroke;
          case key is
             when KEY_UP =>
-               if delta_pos /= (1,0) then
-                  delta_pos := (-1,0);
+               if last_dir /= (1,0) then
+                  dir := (-1,0);
                end if;
             when KEY_DOWN =>
-               if delta_pos /= (-1,0) then
-                  delta_pos := (1,0);
+               if last_dir /= (-1,0) then
+                  dir := (1,0);
                end if;
             when KEY_LEFT =>
-               if delta_pos /= (0,1) then
-                  delta_pos := (0,-1);
+               if last_dir /= (0,1) then
+                  dir := (0,-1);
                end if;
             when KEY_RIGHT =>
-               if delta_pos /= (0,-1) then
-                  delta_pos := (0,1);
+               if last_dir /= (0,-1) then
+                  dir := (0,1);
                end if;
             when others => null;
          end case;
@@ -125,7 +125,12 @@ begin
       --Moving the snake on tick
       if (Clock - temps) >= 0.5 then
          temps := Clock;
-         pos := pos + delta_pos;
+         last_dir := dir;
+         pos := pos + dir;
+         Move_cursor(standard_window,0,10);
+         Put(pos.line);
+         Put(",");
+         Put(pos.column);
          --detect collision with border
          exit when pos.column > (Columns - 2);
          exit when pos.column < (1);

@@ -152,7 +152,7 @@ begin
             Add(
                Line=>Element(curs).line,
                Column=>Element(curs).column,
-               ch=>ACS_MAP(ACS_Diamond));
+               ch=>'O');
             --drawing the body part just after the head
             curs := P_lists.Next(curs);
             if Has_Element(curs) then
@@ -183,6 +183,16 @@ begin
                      Line=>Element(curs).line,
                      Column=>Element(curs).column,
                      ch=>ACS_MAP(ACS_Lower_Right_Corner));
+               elsif a.line = 0  then
+                  Add(
+                     Line=>Element(curs).line,
+                     Column=>Element(curs).column,
+                     ch=>ACS_MAP(ACS_Horizontal_Line));
+               elsif a.column = 0 then
+                  Add(
+                     Line=>Element(curs).line,
+                     Column=>Element(curs).column,
+                     ch=>ACS_MAP(ACS_Vertical_Line));
                end if;
             end if;
 

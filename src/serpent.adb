@@ -78,7 +78,7 @@ procedure serpent is
    snake : list;
    snake_cursor : cursor;
    pos, pop, point : T_position;
-   dir, last_dir : T_position :=(0,1); --snake direction
+   dir, last_dir : T_position :=(-1,0); --snake direction
    Gen : Generator;
    temps : Time := Clock;
    duree : Duration := 1.0;
@@ -101,7 +101,7 @@ begin
    Put(score);
 
    --init the snake with a size
-   pos := (line=>1,Column=>1);
+   pos := (line=>Lines/2,Column=>Columns/2);
    for i in 1..8 loop
       Prepend(snake,pos);
       Add(Line=>pos.line, Column=>pos.column, ch=>'O');

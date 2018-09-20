@@ -3,6 +3,7 @@ use  Terminal_Interface.Curses;
 with Terminal_Interface.Curses.Text_IO;
 use  Terminal_Interface.Curses.Text_IO;
 with Terminal_Interface.Curses.Text_IO.Integer_IO;
+with Terminal_Interface.Curses.Text_IO.Fixed_IO;
 
 with Ada.Containers.Doubly_Linked_Lists ;
 with Ada.Calendar; use Ada.Calendar;
@@ -45,6 +46,10 @@ procedure serpent is
    package Integer_Text_IO
    is new Terminal_Interface.Curses.Text_IO.Integer_IO(Integer);
    use Integer_Text_IO;
+
+   package Duration_Text_IO
+   is new Terminal_Interface.Curses.Text_IO.Fixed_IO(Duration);
+   use Duration_Text_IO;
 
    function Self_Collision(snake : list; pos : T_Position) return Boolean is
    curs : cursor := First(snake);
@@ -149,8 +154,12 @@ begin
          if pos = point then
             Spawn_Point(Gen, snake, point);
             Append(snake, snake.Last_Element);
-            speed := speed + 0.10;
+            speed := speed + 2.0;
             loop_delay := Duration(1.0/speed);
+            Move_Cursor(standard_window,Lines-1,1);
+            Put("loop_delay ");
+            Put(loop_delay);
+            Refresh;
             score := score + 1;
             Move_Cursor(standard_window,0,18);
             Put("score : ");
@@ -224,26 +233,8 @@ begin
          Refresh;
       end if;
    end loop main;
-
-   --main: loop
-   --   declare
-   --      x : natural;
-   --      a : Character;
-   --      b : boolean;
-   --   begin
-   --      x := 0;
-   --      --get_immediate(a,b);
-   --      --if x in 0..79 then
-   --      --   if (Clock - temps) >= 0.5 then
-   --      --      temps := Clock;
-   --      --      GOTO_XY(x,0);
-   --      --      Put(HBAR);
-   --      --   end if;
-   --      --else 
-   --      --   exit main;
-   --      --end if;
-   --   end;
-   --end loop main;
+   Move_Cursor(line=>Lines/2,column=>(Columns-10)/2);
+   Put("Game Over!");
    Set_Timeout_Mode(mode=>Blocking,Amount=>0);
    key := Get_Keystroke;
    End_Windows;
